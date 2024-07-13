@@ -17,7 +17,7 @@ public class RESTfulController {
 
         //keine datenbank implementiert, vorerst nur mit admin admin
         if(username.equals("admin") && password.equals("admin")){
-            System.out.println("est");
+            System.out.println("est"    );
         }
         return "Login erfolgreich für Benutzer: " + username;
     }
