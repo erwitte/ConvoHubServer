@@ -4,11 +4,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "http://localhost:3001")
 @RestController
 public class RESTfulController {
     private final Database database = new Database();
 
-    @CrossOrigin(origins = "http://localhost:3001")
+
     @PostMapping("/api/login")
     public String loginRequest(@RequestBody LoginRequest loginRequest){
         String username = loginRequest.getUsername();
@@ -19,8 +20,7 @@ public class RESTfulController {
         }
         return "Passwort/Username ist falsch";
     }
-
-    @CrossOrigin(origins = "http://localhost:3001")
+                        
     @PostMapping("/api/register")
     public String register(@RequestBody LoginRequest loginRequest){
         boolean successful = database.addUser(loginRequest.getUsername(), loginRequest.getPassword());

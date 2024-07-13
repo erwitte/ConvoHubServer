@@ -60,8 +60,7 @@ public class Database {
         String createRoom_UsersTable =  "CREATE TABLE ROOM_USERS (" +
                 "USER_ID INTEGER NOT NULL, " +
                 "ROOM_ID INTEGER NOT NULL, " +
-                "ROOMNAME TEXT NOT NULL,"+
-                "USERNAME TEXT NOT NULL," +
+                "PRIMARY KEY (USER_ID, ROOM_ID)," +
                 "FOREIGN KEY (USER_ID) REFERENCES USERS(ID)," +
                 "FOREIGN KEY (ROOM_ID) REFERENCES ROOMS(ID));";
         try {
@@ -151,6 +150,57 @@ public class Database {
         } catch(SQLException e){
             System.out.println(e.getMessage());
             return false;
+        }
+    }
+
+    public boolean removeUserFromRoom(String username, String roomName){
+        try{
+            ResultSet userResultSet = getUserResultSet(username);
+            ResultSet roomResultSet = getRoomsResultSet(roomName);
+            int userId = userResultSet.getInt("ID");
+            int roomId = roomResultSet.getInt("ID");
+            String removeUserFromRoomQuery = "DELETE FROM ROOM_USERS WHERE USER_ID = " + userId + " AND ROOM_ID = " + roomId;
+            return executeQuery(removeUserFromRoomQuery);
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean addUserToRoom(String username, String roomName){
+        try {
+            ResultSet userResultSet = getUserResultSet(username);
+            ResultSet roomResultSet = getRoomsResultSet(roomName);
+            int userId = userResultSet.getInt("ID");
+            int roomId = roomResultSet.getInt("ID");
+            String addUserToRoomQuery = "INSERT INTO ROOM_USERS (USER_ID, ROOM_ID) VALUES (" + userId + ", " +
+                    roomId + ")";
+            return executeQuery(addUserToRoomQuery);
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
+
+    private ResultSet getUserResultSet(String username){
+        String getUserQuery = "SELECT * FROM USERS WHERE USERNAME = '" + username + "'";
+        return getResultSet(getUserQuery);
+    }
+
+    private ResultSet getRoomsResultSet(String roomName){
+        String getRoomsQuery = "SELECT * FROM ROOMS WHERE ROOMNAME = '" + roomName + "'";
+        return getResultSet(getRoomsQuery);
+    }
+
+    private ResultSet getResultSet(String query){
+        try{
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            rs.next();
+            return rs;
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+            return null;
         }
     }
 }

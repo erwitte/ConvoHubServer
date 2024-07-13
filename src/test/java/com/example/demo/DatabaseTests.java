@@ -2,7 +2,6 @@ package com.example.demo;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -78,5 +77,30 @@ class DatabaseTests {
     @Test
     void logInFalseTest(){
         assertFalse(database.logIn("false", "password"));
+    }
+
+    @Test
+    void add1UserToRoomTrue(){
+        database.addUser("addUserToRoom", "password");
+        database.addRoom("addRoomToUser", "password");
+        assertTrue(database.addUserToRoom("addUserToRoom", "addRoomToUser"));
+    }
+
+    @Test
+    void add2UsersToRoomTrue(){
+        database.addUser("addUserToRoom2", "password");
+        assertTrue(database.addUserToRoom("addUserToRoom2", "addRoomToUser"));
+    }
+
+    @Test
+    void addUserToRoomFalse(){
+        assertFalse(database.addUserToRoom("addUserToRoom2", "addRoomToUser"));
+    }
+
+    @Test
+    void removeUserFromRoomTrue(){
+        database.addUser("test", "password");
+        database.addRoom("est", "password");
+        assertTrue(database.removeUserFromRoom("test", "est"));
     }
 }
