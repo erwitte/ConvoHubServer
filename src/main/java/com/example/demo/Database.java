@@ -42,24 +42,28 @@ public class Database {
 
     private void createUsersTable(){
         String createUsersTable =   "CREATE TABLE USERS (" +
-                "USERNAME VARCHAR(255) PRIMARY KEY," +
+                "ID SERIAL PRIMARY KEY, " +
+                "USERNAME VARCHAR(255) NOT NULL, " +
                 "PASSWORD VARCHAR(255) NOT NULL);";
         executeQuery(createUsersTable);
     }
 
     private void createRoomsTable(){
         String createRoomsTable =   "CREATE TABLE ROOMS (" +
-                "ROOMNAME TEXT PRIMARY KEY," +
+                "ID SERIAL PRIMARY KEY, " +
+                "ROOMNAME VARCHAR(255) NOT NULL, " +
                 "PASSWORD VARCHAR(255) NOT NULL);";
         executeQuery(createRoomsTable);
     }
 
     private void createRoom_UsersTable(){
         String createRoom_UsersTable =  "CREATE TABLE ROOM_USERS (" +
+                "USER_ID INTEGER NOT NULL, " +
+                "ROOM_ID INTEGER NOT NULL, " +
                 "ROOMNAME TEXT NOT NULL,"+
                 "USERNAME TEXT NOT NULL," +
-                "FOREIGN KEY (USERNAME) REFERENCES USERS(USERNAME)," +
-                "FOREIGN KEY (ROOMNAME) REFERENCES ROOMS(ROOMNAME));";
+                "FOREIGN KEY (USER_ID) REFERENCES USERS(ID)," +
+                "FOREIGN KEY (ROOM_ID) REFERENCES ROOMS(ID));";
         try {
             Statement stmt = conn.createStatement();
             stmt.executeUpdate(createRoom_UsersTable);
