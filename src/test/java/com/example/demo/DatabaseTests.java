@@ -68,4 +68,15 @@ class DatabaseTests {
         assertTrue(database.addRoom("room2", "password3"));
         assertFalse(database.addRoom("room2", "duplicate"));
     }
+
+    @Test
+    void logInTrueTest(){
+        database.addUser("logIn", "password");
+        assertTrue(database.logIn("logIn", "password"));
+    }
+
+    @Test
+    void logInFalseTest(){
+        assertFalse(database.logIn("false", "password"));
+    }
 }

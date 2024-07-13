@@ -110,6 +110,21 @@ public class Database {
         return executeQuery(addQuery);
     }
 
+    public boolean logIn(String username, String password){
+        String logInQuery = "SELECT * FROM USERS WHERE USERNAME = '" + username + "'";
+        try{
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(logInQuery);
+            if (rs.next()){
+                String passwordInDb = rs.getString("password");
+                return password.equals(passwordInDb);
+            }
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return false;
+    }
+
     private boolean isExistsUser(String username){
         String checkQuery = "SELECT * FROM USERS WHERE USERNAME = '" + username + "'";
         try {
