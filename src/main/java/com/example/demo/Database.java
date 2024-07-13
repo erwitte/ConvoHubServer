@@ -44,24 +44,14 @@ public class Database {
         String createUsersTable =   "CREATE TABLE USERS (" +
                 "USERNAME VARCHAR(255) PRIMARY KEY," +
                 "PASSWORD VARCHAR(255) NOT NULL);";
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.executeUpdate(createUsersTable);
-        } catch (SQLException e){
-            System.out.println(e.getMessage());
-        }
+        executeQuery(createUsersTable);
     }
 
     private void createRoomsTable(){
         String createRoomsTable =   "CREATE TABLE ROOMS (" +
                 "ROOMNAME TEXT PRIMARY KEY," +
                 "PASSWORD VARCHAR(255) NOT NULL);";
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.executeUpdate(createRoomsTable);
-        } catch (SQLException e){
-            System.out.println(e.getMessage());
-        }
+        executeQuery(createRoomsTable);
     }
 
     private void createRoom_UsersTable(){
@@ -98,39 +88,17 @@ public class Database {
         if (isExistsRoom(roomName)) {
             return false;   // username already in database
         }
-
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.executeUpdate(addQuery);
-            return true;
-        } catch(SQLException e){
-            System.out.println(e.getMessage());
-            return false;
-        }
+        return executeQuery(addQuery);
     }
 
     public boolean removeRoom(String roomName){
         String removeRoomrQuery = "DELETE FROM ROOMS WHERE ROOMNAME = '" + roomName + "'";
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.executeUpdate(removeRoomrQuery);
-            return true;
-        } catch (SQLException e){
-            System.out.println(e.getMessage());
-            return false;
-        }
+        return executeQuery(removeRoomrQuery);
     }
 
     public boolean removeUser(String username){
         String removeUserQuery = "DELETE FROM USERS WHERE USERNAME = '" + username + "'";
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.executeUpdate(removeUserQuery);
-            return true;
-        } catch (SQLException e){
-            System.out.println(e.getMessage());
-            return false;
-        }
+        return executeQuery(removeUserQuery);
     }
 
     public boolean addUser(String username, String password){
@@ -139,15 +107,7 @@ public class Database {
         if (isExistsUser(username)){
             return false;   // username already in database
         }
-
-        try {
-            Statement stmt = conn.createStatement();
-            stmt.executeUpdate(addQuery);
-            return true;
-        } catch(SQLException e){
-            System.out.println(e.getMessage());
-            return false;
-        }
+        return executeQuery(addQuery);
     }
 
     private boolean isExistsUser(String username){
@@ -162,5 +122,16 @@ public class Database {
             System.out.println(e.getMessage());
         }
         return false;
+    }
+
+    private boolean executeQuery(String query){
+        try{
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+            return true;
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
+            return false;
+        }
     }
 }

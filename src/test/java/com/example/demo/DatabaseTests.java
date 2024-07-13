@@ -51,7 +51,7 @@ class DatabaseTests {
     }
 
     //@Test
-    //void removeUserFalse() {}
+    //void removeUserFalse() {      }
 
     @Test
     void addRoomTrue() {
@@ -68,4 +68,4 @@ class DatabaseTests {
         assertTrue(database.addRoom("room2", "password3"));
         assertFalse(database.addRoom("room2", "duplicate"));
     }
-}                           
+}
