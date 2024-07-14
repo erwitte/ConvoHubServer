@@ -33,6 +33,7 @@ public class RESTfulControllerTests {
     @BeforeAll
     static void setUp() {
         loginRequest = new LoginRequest();
+        // database was mocked ińitially
         database = new Database();
     }
 

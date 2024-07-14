@@ -61,8 +61,8 @@ public class Database {
                 "USER_ID INTEGER NOT NULL, " +
                 "ROOM_ID INTEGER NOT NULL, " +
                 "PRIMARY KEY (USER_ID, ROOM_ID)," +
-                "FOREIGN KEY (USER_ID) REFERENCES USERS(ID)," +
-                "FOREIGN KEY (ROOM_ID) REFERENCES ROOMS(ID));";
+                "FOREIGN KEY (USER_ID) REFERENCES USERS(ID) ON DELETE CASCADE ," +
+                "FOREIGN KEY (ROOM_ID) REFERENCES ROOMS(ID) ON DELETE CASCADE );";
         try {
             Statement stmt = conn.createStatement();
             stmt.executeUpdate(createRoom_UsersTable);
