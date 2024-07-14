@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -34,6 +35,7 @@ public class RESTfulControllerTests {
 
     @BeforeAll
     static void setUp() {
+        loginRequest = new LoginRequest();
         database = new Database();
     }
 
@@ -50,9 +52,9 @@ public class RESTfulControllerTests {
     }
 
     @Test
+    @Order(1)
     public void testLoginRequestTrue() throws Exception {
         database.addUser("testUser", "testPass");
-        loginRequest = new LoginRequest();
         loginRequest.setUsername("testUser");
         loginRequest.setPassword("testPass");
 
@@ -64,8 +66,8 @@ public class RESTfulControllerTests {
     }
 
     @Test
+    @Order(2)
     public void testLoginRequestFalse() throws Exception {
-        loginRequest = new LoginRequest();
         loginRequest.setUsername("testUser");
         loginRequest.setPassword("testPassFalse");
 
@@ -91,6 +93,7 @@ public class RESTfulControllerTests {
 
     @Test
     public void testRegistrationRequestFalse() throws Exception {
+        // register user
         loginRequest = new LoginRequest();
         loginRequest.setUsername("testRegistration1");
         loginRequest.setPassword("testPass");
@@ -98,7 +101,7 @@ public class RESTfulControllerTests {
         mockMvc.perform(post("/api/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)));
-
+        // try same username for registration again
         loginRequest.setUsername("testRegistration1");
         loginRequest.setPassword("testPassFalse");
         mockMvc.perform(post("/api/register")
