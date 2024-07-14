@@ -2,6 +2,8 @@ package com.example.demo;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "http://localhost:3001")
@@ -11,16 +13,17 @@ public class RESTfulController {
 
 
     @PostMapping("/api/login")
-    public String loginRequest(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<Boolean> loginRequest(@RequestBody LoginRequest loginRequest){
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
+
         System.out.println("Log In Versuch: " + username);
-        if (database.logIn(username, password)){
-            return "Login erfolgreich für Benutzer: " + username;
+        if(database.logIn(username, password)){
+            return ResponseEntity.ok(true);
         }
-        return "Passwort/Username ist falsch";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
     }
-                        
+
     @PostMapping("/api/register")
     public String register(@RequestBody LoginRequest loginRequest){
         boolean successful = database.addUser(loginRequest.getUsername(), loginRequest.getPassword());
