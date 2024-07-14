@@ -35,9 +35,6 @@ public class RESTfulControllerTests {
     @BeforeAll
     static void setUp() {
         database = new Database();
-        loginRequest = new LoginRequest();
-        loginRequest.setUsername("testUser");
-        loginRequest.setPassword("testPass");
     }
 
     @AfterAll
@@ -53,8 +50,11 @@ public class RESTfulControllerTests {
     }
 
     @Test
-    public void testLoginRequestTrue() throws Exception {   
+    public void testLoginRequestTrue() throws Exception {
         database.addUser("testUser", "testPass");
+        loginRequest = new LoginRequest();
+        loginRequest.setUsername("testUser");
+        loginRequest.setPassword("testPass");
 
         mockMvc.perform(post("/api/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -65,16 +65,46 @@ public class RESTfulControllerTests {
 
     @Test
     public void testLoginRequestFalse() throws Exception {
-        var loginRequestFalse = new LoginRequest();
-        loginRequestFalse.setUsername("testUser");
-        loginRequestFalse.setPassword("testPassFalse");
+        loginRequest = new LoginRequest();
+        loginRequest.setUsername("testUser");
+        loginRequest.setPassword("testPassFalse");
 
         mockMvc.perform(post("/api/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequestFalse)))
+                        .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("false"));
     }
 
+    @Test
+    public void testRegistrationRequestTrue() throws Exception {
+        loginRequest = new LoginRequest();
+        loginRequest.setUsername("testRegistration");
+        loginRequest.setPassword("testPass");
 
+        mockMvc.perform(post("/api/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
+    }
+
+    @Test
+    public void testRegistrationRequestFalse() throws Exception {
+        loginRequest = new LoginRequest();
+        loginRequest.setUsername("testRegistration1");
+        loginRequest.setPassword("testPass");
+
+        mockMvc.perform(post("/api/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)));
+
+        loginRequest.setUsername("testRegistration1");
+        loginRequest.setPassword("testPassFalse");
+        mockMvc.perform(post("/api/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string("false"));
+    }
 }

@@ -25,8 +25,11 @@ public class RESTfulController {
     }
 
     @PostMapping("/api/register")
-    public boolean register(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<Boolean> register(@RequestBody LoginRequest loginRequest){
         System.out.println("registry");
-        return database.addUser(loginRequest.getUsername(), loginRequest.getPassword());
+        if (database.addUser(loginRequest.getUsername(), loginRequest.getPassword())){
+            return ResponseEntity.ok(true);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
     }
 }
