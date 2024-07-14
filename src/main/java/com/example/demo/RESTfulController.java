@@ -25,12 +25,8 @@ public class RESTfulController {
     }
 
     @PostMapping("/api/register")
-    public String register(@RequestBody LoginRequest loginRequest){
-        boolean successful = database.addUser(loginRequest.getUsername(), loginRequest.getPassword());
+    public boolean register(@RequestBody LoginRequest loginRequest){
         System.out.println("registry");
-        if (successful){
-            return "Registerung erfolgreich";
-        }
-        return "Username schon vergeben";
+        return database.addUser(loginRequest.getUsername(), loginRequest.getPassword());
     }
 }
