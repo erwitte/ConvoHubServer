@@ -85,6 +85,22 @@ public class Database {
         return false;
     }
 
+    public String getPasswordByUsername(String username){
+        String passwordQuery = "SELECT PASSWORD FROM USERS WHERE USERNAME = '" + username + "'";
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(passwordQuery);
+
+            if(rs.next()){
+                return rs.getString("password");
+            }
+
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
     public boolean addRoom(String roomName, String password) {
         String addQuery = "INSERT INTO ROOMS (ROOMNAME, PASSWORD) VALUES ('"
                 + roomName + "', '" + password + "')";

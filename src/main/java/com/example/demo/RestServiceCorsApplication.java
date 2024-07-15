@@ -1,3 +1,4 @@
+/*
 package com.example.demo;
 
 import org.springframework.context.annotation.Configuration;
@@ -13,5 +14,11 @@ public class RestServiceCorsApplication implements WebMvcConfigurer {
                 .allowedOrigins("http://localhost:3000")  // Erlaubte Ursprünge (Origins)
                 .allowedMethods("GET", "POST", "PUT", "DELETE")  // Erlaubte HTTP-Methoden
                 .allowedHeaders("*");  // Erlaubte Header
+        registry.addMapping("/api/register")  // Hier den Pfad angeben, der CORS erlaubt sein soll
+                .allowedOrigins("http://localhost:3000")  // Erlaubte Ursprünge (Origins)
+                .allowedMethods("GET", "POST", "PUT", "DELETE")  // Erlaubte HTTP-Methoden
+                .allowedHeaders("*");  // Erlaubte Header
     }
+
 }
+*/
