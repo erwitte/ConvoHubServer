@@ -208,6 +208,17 @@ public class Database {
         return getResultSet(getRoomsQuery);
     }
 
+    public int getUserId(String username){
+        String getUserIdQuery = "SELECT * FROM USERS WHERE USERNAME = '" + username + "'";
+        ResultSet rs = getResultSet(getUserIdQuery);
+        try {
+            return rs.getInt("ID");
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+
     private ResultSet getResultSet(String query){
         try{
             Statement stmt = conn.createStatement();

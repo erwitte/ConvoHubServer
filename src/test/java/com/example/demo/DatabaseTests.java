@@ -40,13 +40,14 @@ class DatabaseTests {
 
     @Test
     void testAddUserDuplicate() {
-        assertTrue(database.addUser("user2", "password2"));
-        assertFalse(database.addUser("user2", "duplicate")); // Duplicate username
+        assertTrue(database.addUser("user5", "password2"));
+        assertFalse(database.addUser("user5", "duplicate")); // Duplicate username
     }
 
     @Test
     void removeUserTrue() {
-        assertTrue(database.removeUser("user2"));
+        database.addUser("userRemove", "password1");
+        assertTrue(database.removeUser("userRemove"));
     }
 
     //@Test
@@ -112,5 +113,22 @@ class DatabaseTests {
     @Test
     void removeUserFromNonExistingRoom(){
         assertFalse(database.removeUserFromRoom("true", "false"));
+    }
+
+    @Test
+    void getUserIdTest(){
+        try (Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/convohub", "user", "password")) {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("DROP TABLE IF EXISTS ROOM_USERS");
+            stmt.executeUpdate("DROP TABLE IF EXISTS USERS");
+            stmt.executeUpdate("DROP TABLE IF EXISTS ROOMS");
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        database = new Database();
+        database.addUser("user1", "password1");
+        database.addUser("user2", "password2");
+        assertSame(1, database.getUserId("user1"));
+        assertSame(2, database.getUserId("user2"));
     }
 }
