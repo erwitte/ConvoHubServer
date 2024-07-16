@@ -18,10 +18,17 @@ public class RoomController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
-    public void deleteRoom(@PathVariable("id") int id, HttpServletRequest request) {
+    @DeleteMapping("/deleteRoom/{id}")
+    public void deleteRoom(@PathVariable("id") int id) {
         if (database.removeRoomById(id)){
             System.out.println("Room " + id + " deleted");
         }
+    }
+
+    @DeleteMapping("/deleteUserFromRoom/{id}")
+    public void deleteUserFromRoom(@PathVariable("id") int id, HttpServletRequest request) {
+        Cookie cookie = request.getCookies()[0];
+        int userId = database.getUserId(cookie.getName());
+        database.removeUserFromRoomById(userId, id);
     }
 }

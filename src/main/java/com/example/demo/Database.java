@@ -141,7 +141,7 @@ public class Database {
             return rs.getInt("ID");
         } catch (SQLException e){
             System.out.println(e.getMessage());
-            return 0;                                   
+            return 0;
         }
     }
 
@@ -202,7 +202,7 @@ public class Database {
 
     public boolean removeUserFromRoom(String username, String roomName){
         try{
-            ResultSet userResultSet = getUserResultSet(username);
+            ResultSet userResultSet = getUserResultSetName(username);
             ResultSet roomResultSet = getRoomsResultSet(roomName);
             int userId = userResultSet.getInt("ID");
             int roomId = roomResultSet.getInt("ID");
@@ -214,9 +214,14 @@ public class Database {
         return false;
     }
 
+    public boolean removeUserFromRoomById(int userId, int roomId){
+        String removeUserFromRoomQuery = "DELETE FROM ROOM_USERS WHERE USER_ID = " + userId + " AND ROOM_ID = " + roomId;
+        return executeQuery(removeUserFromRoomQuery);
+    }
+
     public boolean addUserToRoom(String username, String roomName){
         try {
-            ResultSet userResultSet = getUserResultSet(username);
+            ResultSet userResultSet = getUserResultSetName(username);
             ResultSet roomResultSet = getRoomsResultSet(roomName);
             int userId = userResultSet.getInt("ID");
             int roomId = roomResultSet.getInt("ID");
@@ -229,7 +234,7 @@ public class Database {
         return false;
     }
 
-    private ResultSet getUserResultSet(String username){
+    private ResultSet getUserResultSetName(String username){
         String getUserQuery = "SELECT * FROM USERS WHERE USERNAME = '" + username + "'";
         return getResultSet(getUserQuery);
     }
