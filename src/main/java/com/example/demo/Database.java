@@ -1,5 +1,7 @@
 package com.example.demo;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.System.exit;
 
@@ -54,6 +56,8 @@ public class Database {
                 "ROOMNAME VARCHAR(255) NOT NULL, " +
                 "PASSWORD VARCHAR(255) NOT NULL);";
         executeQuery(createRoomsTable);
+
+        addRoom("Welcome Room", "");
     }
 
     private void createRoom_UsersTable(){
@@ -126,8 +130,11 @@ public class Database {
         if (isExistsUser(username)){
             return false;   // username already in database
         }
+
+
         return executeQuery(addQuery);
     }
+
 
     public boolean logIn(String username, String password){
         String logInQuery = "SELECT * FROM USERS WHERE USERNAME = '" + username + "'";
@@ -212,6 +219,7 @@ public class Database {
         String getUserIdQuery = "SELECT * FROM USERS WHERE USERNAME = '" + username + "'";
         ResultSet rs = getResultSet(getUserIdQuery);
         try {
+            rs.next();
             return rs.getInt("ID");
         } catch (Exception e){
             System.out.println(e.getMessage());
@@ -219,11 +227,55 @@ public class Database {
         }
     }
 
+    public List<Room> convertResultSetToList(ResultSet resultSet) throws SQLException {
+        List<Room> rooms = new ArrayList<>();
+
+
+
+        while (resultSet.next()) {
+            Room room = new Room();
+            room.setRoomId(resultSet.getInt("id"));
+            room.setRoomName(resultSet.getString("roomname"));
+            rooms.add(room);
+        }
+        return rooms;
+    }
+
+    public ResultSet getUserRoomsResultSet(int userId) {
+        // Query, um die RoomIDs zu bekommen, denen der Nutzer zugeordnet ist
+        String getUserRoomsQuery = "SELECT room_id FROM room_users WHERE user_id = " + userId;
+        System.out.println(getUserRoomsQuery);
+        // ResultSet für die RoomIDs
+        ResultSet roomIdsResultSet = getResultSet(getUserRoomsQuery);
+        System.out.println(roomIdsResultSet);
+
+        StringBuilder roomIdsString = new StringBuilder();
+        try{
+            while(roomIdsResultSet.next()){
+                roomIdsString.append(roomIdsResultSet.getInt("room_id"));
+                roomIdsString.append(", ");
+            }
+            if (roomIdsString.length() > 0) {
+                roomIdsString.setLength(roomIdsString.length() - 2);
+            }
+
+        }catch (Exception e){
+
+        }
+        System.out.println("formatted strbuild: ("+ roomIdsString.toString() + ")");
+        String getRoomNameQuery = "SELECT id, roomname FROM rooms WHERE id IN ("+roomIdsString+")";
+        System.out.println(getRoomNameQuery);
+        //ResultSet für Rooms
+        ResultSet roomCompleteRs = getResultSet(getRoomNameQuery);
+
+        return roomCompleteRs;
+    }
+
     private ResultSet getResultSet(String query){
         try{
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
-            rs.next();
+            //rs.next();
             return rs;
         } catch (SQLException e){
             System.out.println(e.getMessage());
