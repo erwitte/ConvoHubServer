@@ -7,9 +7,12 @@ import static java.lang.System.exit;
 
 public class Database {
     private final String username, password, url;
-    private Connection conn;
+    private static Connection conn;
+    private static boolean isCreated = false;
 
-    public Database() {
+    private static Database database;
+
+    Database() {
         url = "jdbc:postgresql://localhost:5432/convohub";
         username = "user";
         password = "password";
@@ -17,6 +20,14 @@ public class Database {
             exit(0); // if there is no db the program exits
         }
         setUpTable();
+        isCreated = true;
+    }
+
+    public static Database getInstance() {
+        if (!isCreated){
+            database = new Database();
+        }
+        return database;
     }
 
     private boolean setUpDatabase(){
@@ -219,7 +230,6 @@ public class Database {
         String getUserIdQuery = "SELECT * FROM USERS WHERE USERNAME = '" + username + "'";
         ResultSet rs = getResultSet(getUserIdQuery);
         try {
-            rs.next();
             return rs.getInt("ID");
         } catch (Exception e){
             System.out.println(e.getMessage());
@@ -275,7 +285,7 @@ public class Database {
         try{
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
-            //rs.next();
+            rs.next();
             return rs;
         } catch (SQLException e){
             System.out.println(e.getMessage());

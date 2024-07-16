@@ -2,6 +2,7 @@ package com.example.demo;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -89,8 +90,11 @@ class DatabaseTests {
 
     @Test
     void add2UsersToRoomTrue(){
-        database.addUser("addUserToRoom2", "password");
-        assertTrue(database.addUserToRoom("addUserToRoom2", "addRoomToUser"));
+        database.addUser("addUserToRoom1", "password");
+        database.addUser("addUserToRoom2", "password2");
+        database.addRoom("addRoomToUser2", "password");
+        assertTrue(database.addUserToRoom("addUserToRoom1", "addRoomToUser2"));
+        assertTrue(database.addUserToRoom("addUserToRoom2", "addRoomToUser2"));
     }
     
     @Test
@@ -102,6 +106,7 @@ class DatabaseTests {
     void removeUserFromRoomTrue(){
         database.addUser("test", "password");
         database.addRoom("est", "password");
+        database.addUserToRoom("test", "est");
         assertTrue(database.removeUserFromRoom("test", "est"));
     }
 
@@ -125,7 +130,7 @@ class DatabaseTests {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        database = new Database();
+        database = new Database()       ;
         database.addUser("user1", "password1");
         database.addUser("user2", "password2");
         assertSame(1, database.getUserId("user1"));

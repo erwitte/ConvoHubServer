@@ -34,7 +34,7 @@ public class RESTfulControllerTests {
     static void setUp() {
         loginRequest = new LoginRequest();
         // database was mocked ińitially
-        database = new Database();
+        database = Database.getInstance();
     }
 
     @AfterAll
