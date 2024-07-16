@@ -59,7 +59,7 @@ public class RESTfulController {
     }*/
 
      @PostMapping("/api/login")
-    public ResponseEntity<String> loginRequest(@RequestBody LoginRequest loginRequest ,HttpServletResponse response){
+    public ResponseEntity<String> loginRequest(@RequestBody LoginRequest loginRequest, HttpServletResponse response){
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
 

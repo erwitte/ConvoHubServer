@@ -124,9 +124,25 @@ public class Database {
         return executeQuery(addQuery);
     }
 
-    public boolean removeRoom(String roomName){
+    public boolean removeRoomByName(String roomName){
         String removeRoomrQuery = "DELETE FROM ROOMS WHERE ROOMNAME = '" + roomName + "'";
         return executeQuery(removeRoomrQuery);
+    }
+
+    public boolean removeRoomById(int id){
+        String removeRoomrQuery = "DELETE FROM ROOMS WHERE ID = '" + id + "'";
+        return executeQuery(removeRoomrQuery);
+    }
+
+    public int getRoomId(String roomName){
+        String getRoomIdQuery = "SELECT ID FROM ROOMS WHERE ROOMNAME = '" + roomName + "'";
+        ResultSet rs = getResultSet(getRoomIdQuery);
+        try {
+            return rs.getInt("ID");
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+            return 0;                                   
+        }
     }
 
     public boolean removeUser(String username){

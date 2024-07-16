@@ -60,9 +60,16 @@ class DatabaseTests {
     }
 
     @Test
-    void removeRoomTrue() {
+    void removeRoomByNameTrue() {
         assertTrue(database.addRoom("roomRemove"));
-        assertTrue(database.removeRoom("roomRemove"));
+        assertTrue(database.removeRoomByName("roomRemove"));
+    }
+
+    @Test
+    void removeRoomByIdFalse() {
+        database.addRoom("roomRemoveById");
+        int id = database.getRoomId("roomRemoveById");
+        assertTrue(database.removeRoomById(id));
     }
 
     @Test
