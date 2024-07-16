@@ -93,8 +93,8 @@ public class Database {
             if (rs.next()){ // checks if there is an entry for that name
                 return true;
             }
-        } catch (SQLException e){
-            System.out.println(e.getMessage());
+        } catch (SQLException e) {
+            return false;
         }
         return false;
     }
@@ -116,8 +116,7 @@ public class Database {
     }
 
     public boolean addRoom(String roomName) {
-        String addQuery = "INSERT INTO ROOMS (ROOMNAME) VALUES ('"
-                + roomName + "')";
+        String addQuery = "INSERT INTO ROOMS (ROOMNAME, PASSWORD) VALUES ('" + roomName + "', '')";
         if (isExistsRoom(roomName)) {
             return false;   // username already in database
         }
@@ -286,9 +285,7 @@ public class Database {
         String getUserRoomsQuery = "SELECT room_id FROM room_users WHERE user_id = " + userId;
         System.out.println(getUserRoomsQuery);
         // ResultSet für die RoomIDs
-        ResultSet roomIdsResultSet = getResultSet(getUserRoomsQuery);
-        System.out.println(roomIdsResultSet);
-
+        ResultSet roomIdsResultSet = getResultSetNElements(getUserRoomsQuery);
         StringBuilder roomIdsString = new StringBuilder();
         try{
             while(roomIdsResultSet.next()){
@@ -302,9 +299,7 @@ public class Database {
         }catch (Exception e){
 
         }
-        System.out.println("formatted strbuild: ("+ roomIdsString.toString() + ")");
         String getRoomNameQuery = "SELECT id, roomname FROM rooms WHERE id IN ("+roomIdsString+")";
-        System.out.println(getRoomNameQuery);
         //ResultSet für Rooms
         ResultSet roomCompleteRs = getResultSet(getRoomNameQuery);
 
@@ -316,6 +311,17 @@ public class Database {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
             rs.next();
+            return rs;
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+            return null;
+        }
+    }
+
+    private ResultSet getResultSetNElements(String query){
+        try{
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
             return rs;
         } catch (SQLException e){
             System.out.println(e.getMessage());

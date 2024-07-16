@@ -4,22 +4,24 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/rooms")
+@RequestMapping("/api/room")
 public class RoomController {
     private final Database database = Database.getInstance();
 
     @PutMapping("/create")
-    public void createRoom(@RequestBody CreateRoomRequest room, HttpServletRequest request) {
-        Cookie cookie = request.getCookies()[0];
-        if (database.addRoom(room.roomName())){
-            System.out.println("Room " + room.roomName() + " created");
-            database.addUserToRoom(cookie.getName(), room.roomName());
+    public ResponseEntity<Boolean> createRoom(@RequestBody CreateRoomRequest room, @CookieValue("jwtToken") String token) {
+        System.out.println("room created");
+        if (database.addRoom(room.createChannelName())){
+            System.out.println("Room " + room.createChannelName() + " created");
+            database.addUserToRoom(ServerCrypto.getUsernameFromToken(token), room.createChannelName());
+            return ResponseEntity.status(HttpStatus.OK).body(true);
         }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(true);
     }
 
     @DeleteMapping("/deleteRoom/{id}")

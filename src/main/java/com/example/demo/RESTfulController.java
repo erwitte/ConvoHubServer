@@ -1,11 +1,7 @@
 package com.example.demo;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
@@ -20,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
+import static com.example.demo.ServerCrypto.printDebug;
 
 @RestController
 public class RESTfulController {
@@ -41,8 +39,8 @@ public class RESTfulController {
         //compare with bcrypt
         if(passwordEncoder.matches(password, hashPassword)){
             try{
-                String token = createTokenForLoginUser(username);
-                response.addCookie(createSessionCookie(token)); // Füge das Cookie zur Antwort hinzu
+                String token = ServerCrypto.createTokenForLoginUser(username);
+                response.addCookie(ServerCrypto.createSessionCookie(token)); // Füge das Cookie zur Antwort hinzu
                 return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
             }catch (JWTCreationException exception){
                 //....
@@ -70,7 +68,7 @@ public class RESTfulController {
     public ResponseEntity<Boolean> logout(HttpServletResponse response, HttpServletRequest request){
          printDebug("logout", request.getRemoteUser());
        if(request.getCookies() != null){
-           response.addCookie(createLogoutCookie());
+           response.addCookie(ServerCrypto.createLogoutCookie());
            printDebug("logout", "done");
            return ResponseEntity.status(HttpStatus.OK).body(true);
        }
@@ -79,11 +77,11 @@ public class RESTfulController {
 
     @GetMapping("/api/user")
     public ResponseEntity<String> getUsername(@CookieValue("jwtToken") String token){
-        DecodedJWT decodedJWT;
+        printDebug("user", token);
         String username="";
         try{
-            if(checkIfUserIsLegit(token)){
-                username = getUserIDFromToken(token);
+            if(ServerCrypto.checkIfUserIsLegit(token)){
+                username = ServerCrypto.getUsernameFromToken(token);
                 return ResponseEntity.status(HttpStatus.OK).body("{\"username\": \"" + username + "\"}");
             } else {
                 throw new JWTVerificationException("User database error");
@@ -97,9 +95,10 @@ public class RESTfulController {
     @GetMapping("/api/channel")
     public ResponseEntity<String> getChannels(@CookieValue("jwtToken") String token){
         String username="";
+        printDebug("channel", token);
         try{
-            if(checkIfUserIsLegit(token)){
-                username = getUserIDFromToken(token);
+            if(ServerCrypto.checkIfUserIsLegit(token)){
+                username = ServerCrypto.getUsernameFromToken(token);
                 ResultSet rs = database.getUserRoomsResultSet(database.getUserId(username));
                 List<Room> rooms = database.convertResultSetToList(rs);
                 //json convert
@@ -136,7 +135,7 @@ public class RESTfulController {
 
     @DeleteMapping("/api/delete")
     public ResponseEntity<Boolean> deleteUser(@CookieValue("jwtToken") String token){
-         int userId = database.getUserId(getUserIDFromToken(token));
+         int userId = database.getUserId(ServerCrypto.getUsernameFromToken(token));
          if (database.removeUserById(userId)){
              return ResponseEntity.status(HttpStatus.OK).body(true);
          }
@@ -144,60 +143,4 @@ public class RESTfulController {
     }
 
 
-    private String getUserIDFromToken(String token){
-        printDebug("getUserIDFromToken", token);
-        DecodedJWT decodedJWT;
-        Algorithm algorithm = Algorithm.HMAC256("CWhdZS1t4N3Vul6ihk5/5mU5e0Z2St+8o4/pAWFZfA=");
-        JWTVerifier verifier = JWT.require(algorithm)
-                .withIssuer("ConvoHub Server")
-                .build();
-        decodedJWT = verifier.verify(token);
-        return decodedJWT.getSubject();
-    }
-
-    private boolean checkIfUserIsLegit(String token){
-         printDebug("checkIfUserIsLegit", token);
-         String userId  = getUserIDFromToken(token);
-         if(database.getUserId(getUserIDFromToken(token))  != -1){
-             printDebug("checkIfUserIsLegit", "true");
-            return true;
-        }
-        printDebug("checkIfUserIsLegit", "false");
-        return false;
-    }
-
-    private void printDebug(String option, String message){
-         System.out.println(">> [REST-Service] ["+option+"]: "+message);
-    }
-
-    private String createTokenForLoginUser(String username){
-        Algorithm algorithm = Algorithm.HMAC256(cryptoSecret); //das sollte man nicht machen (!)
-        String token = JWT.create()
-                .withIssuer("ConvoHub Server")
-                .withSubject(username)
-                .sign(algorithm);
-        return token;
-    }
-
-    private Cookie createSessionCookie(String token){
-        Cookie cookie = new Cookie("jwtToken", token);
-        cookie.setHttpOnly(true); // Cookie ist nur über HTTP erreichbar
-        cookie.setSecure(false); // Erfordert HTTPS für das Cookie
-        cookie.setPath("/"); // Setze den Pfad des Cookies
-        cookie.setMaxAge(2000);
-        cookie.setAttribute("SameSite", "None");
-        cookie.setDomain("localhost");
-        return cookie;
-    }
-
-    private Cookie createLogoutCookie(){
-        Cookie cookie = new Cookie("jwtToken", "");
-        cookie.setMaxAge(0);
-        cookie.setHttpOnly(true); // Cookie ist nur über HTTP erreichbar
-        cookie.setSecure(false); // Erfordert HTTPS für das Cookie
-        cookie.setPath("/"); // Setze den Pfad des Cookie;
-        cookie.setAttribute("SameSite", "None");
-        cookie.setDomain("localhost");
-        return cookie;
-    }
 }
