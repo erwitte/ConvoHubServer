@@ -64,11 +64,10 @@ public class Database {
     private void createRoomsTable(){
         String createRoomsTable =   "CREATE TABLE ROOMS (" +
                 "ID SERIAL PRIMARY KEY, " +
-                "ROOMNAME VARCHAR(255) NOT NULL, " +
-                "PASSWORD VARCHAR(255) NOT NULL);";
+                "ROOMNAME VARCHAR(255) NOT NULL);";
         executeQuery(createRoomsTable);
 
-        addRoom("Welcome Room", "");
+        addRoom("Welcome Room");
     }
 
     private void createRoom_UsersTable(){
@@ -116,9 +115,9 @@ public class Database {
         return null;
     }
 
-    public boolean addRoom(String roomName, String password) {
-        String addQuery = "INSERT INTO ROOMS (ROOMNAME, PASSWORD) VALUES ('"
-                + roomName + "', '" + password + "')";
+    public boolean addRoom(String roomName) {
+        String addQuery = "INSERT INTO ROOMS (ROOMNAME) VALUES ('"
+                + roomName + "')";
         if (isExistsRoom(roomName)) {
             return false;   // username already in database
         }
@@ -141,8 +140,6 @@ public class Database {
         if (isExistsUser(username)){
             return false;   // username already in database
         }
-
-
         return executeQuery(addQuery);
     }
 

@@ -56,18 +56,19 @@ class DatabaseTests {
 
     @Test
     void addRoomTrue() {
-        assertTrue(database.addRoom("room1", "password1"));
+        assertTrue(database.addRoom("room1"));
     }
 
     @Test
     void removeRoomTrue() {
-        assertTrue(database.removeRoom("room1"));
+        assertTrue(database.addRoom("roomRemove"));
+        assertTrue(database.removeRoom("roomRemove"));
     }
 
     @Test
     void addRoomDuplicate() {
-        assertTrue(database.addRoom("room2", "password3"));
-        assertFalse(database.addRoom("room2", "duplicate"));
+        assertTrue(database.addRoom("roomDuplicate"));
+        assertFalse(database.addRoom("roomDuplicate"));
     }
 
     @Test
@@ -84,7 +85,7 @@ class DatabaseTests {
     @Test
     void add1UserToRoomTrue(){
         database.addUser("addUserToRoom", "password");
-        database.addRoom("addRoomToUser", "password");
+        database.addRoom("addRoomToUser");
         assertTrue(database.addUserToRoom("addUserToRoom", "addRoomToUser"));
     }
 
@@ -92,7 +93,7 @@ class DatabaseTests {
     void add2UsersToRoomTrue(){
         database.addUser("addUserToRoom1", "password");
         database.addUser("addUserToRoom2", "password2");
-        database.addRoom("addRoomToUser2", "password");
+        database.addRoom("addRoomToUser2");
         assertTrue(database.addUserToRoom("addUserToRoom1", "addRoomToUser2"));
         assertTrue(database.addUserToRoom("addUserToRoom2", "addRoomToUser2"));
     }
@@ -105,7 +106,7 @@ class DatabaseTests {
     @Test
     void removeUserFromRoomTrue(){
         database.addUser("test", "password");
-        database.addRoom("est", "password");
+        database.addRoom("est");
         database.addUserToRoom("test", "est");
         assertTrue(database.removeUserFromRoom("test", "est"));
     }

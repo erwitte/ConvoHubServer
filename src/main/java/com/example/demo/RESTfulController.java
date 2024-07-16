@@ -23,7 +23,7 @@ import java.util.List;
 
 @RestController
 public class RESTfulController {
-    private final Database database = new Database();
+    private final Database database = Database.getInstance();
     @Autowired
     private PasswordEncoder passwordEncoder;
 

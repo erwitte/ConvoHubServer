@@ -12,7 +12,7 @@ public class RoomController {
 
     @PutMapping("/create")
     public void createRoom(@RequestBody CreateRoomRequest room) {
-        if (database.addRoom(room.roomName(), "passwort")){
+        if (database.addRoom(room.roomName())){
             System.out.println("Room " + room.roomName() + " created");
             //database.addUserToRoom()
         }
