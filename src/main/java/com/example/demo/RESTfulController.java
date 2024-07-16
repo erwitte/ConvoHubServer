@@ -97,7 +97,6 @@ public class RESTfulController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
     }
 
-
     @PostMapping("/api/register")
     public ResponseEntity<Boolean> register(@RequestBody LoginRequest loginRequest){
         System.out.println("registry");
@@ -131,7 +130,6 @@ public class RESTfulController {
        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
     }
 
-
     @GetMapping("/api/user")
     public ResponseEntity<String> getUsername(@CookieValue("jwtToken") String token){
         DecodedJWT decodedJWT;
@@ -153,7 +151,6 @@ public class RESTfulController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
         }
     }
-
 
     //die token abfrage und die zusätzliche datenbankabfrage für den nutzer muss in eine eigene funktion, damit das nicht immer aufgerufen werden muss
     @GetMapping("/api/channel")
@@ -185,7 +182,6 @@ public class RESTfulController {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     String getTokenStrFromCookies(Cookie[] cookies){
@@ -200,7 +196,21 @@ public class RESTfulController {
                 }
             }
         }
-
         return authToken;
+    }
+
+    @DeleteMapping("/api/delete")
+    public ResponseEntity<Boolean> deleteUser(@CookieValue("jwtToken") String token){
+        DecodedJWT decodedJWT;
+        Algorithm algorithm = Algorithm.HMAC256("CWhdZS1t4N3Vul6ihk5/5mU5e0Z2St+8o4/pAWFZfA=");
+        JWTVerifier verifier = JWT.require(algorithm)
+                .withIssuer("ConvoHub Server")
+                .build();
+        decodedJWT = verifier.verify(token);
+         int userId = database.getUserId(decodedJWT.getSubject());
+         if (database.removeUserById(userId)){
+             return ResponseEntity.status(HttpStatus.OK).body(true);
+         }
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
     }
 }

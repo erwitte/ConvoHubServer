@@ -150,6 +150,11 @@ public class Database {
         return executeQuery(removeUserQuery);
     }
 
+    public boolean removeUserById(int id){
+        String removeUserQuery = "DELETE FROM USERS WHERE ID = " + id;
+        return executeQuery(removeUserQuery);
+    }
+
     public boolean addUser(String username, String password){
         String addQuery = "INSERT INTO USERS (username, password) VALUES ('"
                 + username + "', '" + password + "')";

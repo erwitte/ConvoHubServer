@@ -1,5 +1,9 @@
 package com.example.demo;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +30,18 @@ public class RoomController {
     }
 
     @DeleteMapping("/deleteUserFromRoom/{id}")
-    public void deleteUserFromRoom(@PathVariable("id") int id, HttpServletRequest request) {
-        Cookie cookie = request.getCookies()[0];
-        int userId = database.getUserId(cookie.getName());
-        database.removeUserFromRoomById(userId, id);
+    public void deleteUserFromRoom(@PathVariable("id") int id, @CookieValue("jwtToken") String token) {
+        int userId = database.getUserId(getUsernameFromToken(token));
+        database.removeUserFromRoomById(userId, id);    
+    }
+
+    private String getUsernameFromToken(String token) {
+        DecodedJWT decodedJWT;
+        Algorithm algorithm = Algorithm.HMAC256("CWhdZS1t4N3Vul6ihk5/5mU5e0Z2St+8o4/pAWFZfA=");
+        JWTVerifier verifier = JWT.require(algorithm)
+                .withIssuer("ConvoHub Server")
+                .build();
+        decodedJWT = verifier.verify(token);
+        return decodedJWT.getSubject();
     }
 }
