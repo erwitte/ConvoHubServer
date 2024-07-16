@@ -22,7 +22,7 @@ public class Database {
         setUpTable();
         isCreated = true;
     }
-
+    // Singleton pattern to prevent problems by initializing db multiple times
     public static Database getInstance() {
         if (!isCreated){
             database = new Database();
@@ -240,13 +240,19 @@ public class Database {
     public List<Room> convertResultSetToList(ResultSet resultSet) throws SQLException {
         List<Room> rooms = new ArrayList<>();
 
-
-
-        while (resultSet.next()) {
+        try {
             Room room = new Room();
             room.setRoomId(resultSet.getInt("id"));
             room.setRoomName(resultSet.getString("roomname"));
             rooms.add(room);
+            while (resultSet.next()) {
+                room = new Room();
+                room.setRoomId(resultSet.getInt("id"));
+                room.setRoomName(resultSet.getString("roomname"));
+                rooms.add(room);
+            }
+        } catch (NullPointerException e) {
+            System.out.println(e.getMessage());
         }
         return rooms;
     }

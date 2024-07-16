@@ -9,10 +9,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +23,7 @@ import java.util.List;
 
 @RestController
 public class RESTfulController {
-    private final Database database = Database.getInstance();
+    private final Database database = new Database();
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -154,7 +152,6 @@ public class RESTfulController {
         }catch (JWTVerificationException exception){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
         }
-
     }
 
 
@@ -193,7 +190,7 @@ public class RESTfulController {
 
     String getTokenStrFromCookies(Cookie[] cookies){
         String authToken = "";
-        System.out.println("komme rein#");
+        System.out.println("komme rein");
         if(cookies != null){
             for(Cookie cookie : cookies){
                 System.out.println(cookie.getName());
