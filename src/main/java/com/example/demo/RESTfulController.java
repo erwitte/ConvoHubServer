@@ -24,70 +24,25 @@ import java.util.List;
 @RestController
 public class RESTfulController {
     private final Database database = Database.getInstance();
+    private final String cryptoSecret = "CWhdZS1t4N3Vul6ihk5/5mU5e0Z2St+8o4/pAWFZfA=";
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-   /* @PostMapping("/api/login")
-    public ResponseEntity<String> loginRequest(@RequestBody LoginRequest loginRequest){
-        String username = loginRequest.getUsername();
-        String password = loginRequest.getPassword();
-
-        System.out.println("Log In Versuch: " + username);
-
-        //get password
-        String hashPassword = database.getPasswordByUsername(username);
-        System.out.println(hashPassword);
-
-        //compare with bcrypt
-        if(passwordEncoder.matches(password, hashPassword)){
-            //create jwt token
-            try{
-                Algorithm algorithm = Algorithm.HMAC256("CWhdZS1t4N3Vul6ihk5/5mU5e0Z2St+8o4/pAWFZfA="); //das sollte man nicht machen (!)
-                String token = JWT.create()
-                        .withIssuer("ConvoHub Server")
-                        .withSubject(username)
-                        .sign(algorithm);
-
-                System.out.println("true");
-                return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
-            }catch (JWTCreationException exception){
-                //....
-            }
-
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("");
-    }*/
 
      @PostMapping("/api/login")
     public ResponseEntity<String> loginRequest(@RequestBody LoginRequest loginRequest, HttpServletResponse response){
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
 
-        System.out.println("Log In Versuch: " + username);
+        printDebug("login", username+" "+password);
 
         //get password
         String hashPassword = database.getPasswordByUsername(username);
-        System.out.println(hashPassword);
 
         //compare with bcrypt
         if(passwordEncoder.matches(password, hashPassword)){
-            //create jwt token
             try{
-                Algorithm algorithm = Algorithm.HMAC256("CWhdZS1t4N3Vul6ihk5/5mU5e0Z2St+8o4/pAWFZfA="); //das sollte man nicht machen (!)
-                String token = JWT.create()
-                        .withIssuer("ConvoHub Server")
-                        .withSubject(username)
-                        .sign(algorithm);
-
-                System.out.println("true");
-                Cookie cookie = new Cookie("jwtToken", token);
-                cookie.setHttpOnly(true); // Cookie ist nur über HTTP erreichbar
-                cookie.setSecure(false); // Erfordert HTTPS für das Cookie
-                cookie.setPath("/"); // Setze den Pfad des Cookies
-                cookie.setMaxAge(2000);
-                cookie.setAttribute("SameSite", "None");
-                cookie.setDomain("localhost");
-                response.addCookie(cookie); // Füge das Cookie zur Antwort hinzu
+                String token = createTokenForLoginUser(username);
+                response.addCookie(createSessionCookie(token)); // Füge das Cookie zur Antwort hinzu
                 return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
             }catch (JWTCreationException exception){
                 //....
@@ -112,19 +67,11 @@ public class RESTfulController {
     }
 
     @PostMapping("/api/logout")
-    public ResponseEntity<Boolean> register(HttpServletResponse response, HttpServletRequest request){
-       System.out.println(">> RESTful IN: /api/logout FOR "+request.getPathInfo());
-       System.out.println(">> RESTful OUT: overwrite cookie to expire FOR "+request.getPathInfo());
+    public ResponseEntity<Boolean> logout(HttpServletResponse response, HttpServletRequest request){
+         printDebug("logout", request.getRemoteUser());
        if(request.getCookies() != null){
-           Cookie cookie = new Cookie("jwtToken", "");
-           cookie.setMaxAge(0);
-           cookie.setHttpOnly(true); // Cookie ist nur über HTTP erreichbar
-           cookie.setSecure(false); // Erfordert HTTPS für das Cookie
-           cookie.setPath("/"); // Setze den Pfad des Cookie;
-           cookie.setAttribute("SameSite", "None");
-           cookie.setDomain("localhost");
-           response.addCookie(cookie);
-           System.out.println(">> RESTful OUT: done FROM "+request.getPathInfo());
+           response.addCookie(createLogoutCookie());
+           printDebug("logout", "done");
            return ResponseEntity.status(HttpStatus.OK).body(true);
        }
        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
@@ -134,15 +81,9 @@ public class RESTfulController {
     public ResponseEntity<String> getUsername(@CookieValue("jwtToken") String token){
         DecodedJWT decodedJWT;
         String username="";
-        System.out.println(token);
         try{
-            Algorithm algorithm = Algorithm.HMAC256("CWhdZS1t4N3Vul6ihk5/5mU5e0Z2St+8o4/pAWFZfA=");
-            JWTVerifier verifier = JWT.require(algorithm)
-                    .withIssuer("ConvoHub Server")
-                    .build();
-            decodedJWT = verifier.verify(token);
-            if(database.getUserId(decodedJWT.getSubject())  != -1){
-                username = decodedJWT.getSubject();
+            if(checkIfUserIsLegit(token)){
+                username = getUserIDFromToken(token);
                 return ResponseEntity.status(HttpStatus.OK).body("{\"username\": \"" + username + "\"}");
             } else {
                 throw new JWTVerificationException("User database error");
@@ -155,16 +96,10 @@ public class RESTfulController {
     //die token abfrage und die zusätzliche datenbankabfrage für den nutzer muss in eine eigene funktion, damit das nicht immer aufgerufen werden muss
     @GetMapping("/api/channel")
     public ResponseEntity<String> getChannels(@CookieValue("jwtToken") String token){
-        DecodedJWT decodedJWT;
         String username="";
         try{
-            Algorithm algorithm = Algorithm.HMAC256("CWhdZS1t4N3Vul6ihk5/5mU5e0Z2St+8o4/pAWFZfA=");
-            JWTVerifier verifier = JWT.require(algorithm)
-                    .withIssuer("ConvoHub Server")
-                    .build();
-            decodedJWT = verifier.verify(token);
-            if(database.getUserId(decodedJWT.getSubject())  != -1){
-                username = decodedJWT.getSubject();
+            if(checkIfUserIsLegit(token)){
+                username = getUserIDFromToken(token);
                 ResultSet rs = database.getUserRoomsResultSet(database.getUserId(username));
                 List<Room> rooms = database.convertResultSetToList(rs);
                 //json convert
@@ -201,16 +136,68 @@ public class RESTfulController {
 
     @DeleteMapping("/api/delete")
     public ResponseEntity<Boolean> deleteUser(@CookieValue("jwtToken") String token){
+         int userId = database.getUserId(getUserIDFromToken(token));
+         if (database.removeUserById(userId)){
+             return ResponseEntity.status(HttpStatus.OK).body(true);
+         }
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+    }
+
+
+    private String getUserIDFromToken(String token){
+        printDebug("getUserIDFromToken", token);
         DecodedJWT decodedJWT;
         Algorithm algorithm = Algorithm.HMAC256("CWhdZS1t4N3Vul6ihk5/5mU5e0Z2St+8o4/pAWFZfA=");
         JWTVerifier verifier = JWT.require(algorithm)
                 .withIssuer("ConvoHub Server")
                 .build();
         decodedJWT = verifier.verify(token);
-         int userId = database.getUserId(decodedJWT.getSubject());
-         if (database.removeUserById(userId)){
-             return ResponseEntity.status(HttpStatus.OK).body(true);
-         }
-         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
+        return decodedJWT.getSubject();
+    }
+
+    private boolean checkIfUserIsLegit(String token){
+         printDebug("checkIfUserIsLegit", token);
+         String userId  = getUserIDFromToken(token);
+         if(database.getUserId(getUserIDFromToken(token))  != -1){
+             printDebug("checkIfUserIsLegit", "true");
+            return true;
+        }
+        printDebug("checkIfUserIsLegit", "false");
+        return false;
+    }
+
+    private void printDebug(String option, String message){
+         System.out.println(">> [REST-Service] ["+option+"]: "+message);
+    }
+
+    private String createTokenForLoginUser(String username){
+        Algorithm algorithm = Algorithm.HMAC256(cryptoSecret); //das sollte man nicht machen (!)
+        String token = JWT.create()
+                .withIssuer("ConvoHub Server")
+                .withSubject(username)
+                .sign(algorithm);
+        return token;
+    }
+
+    private Cookie createSessionCookie(String token){
+        Cookie cookie = new Cookie("jwtToken", token);
+        cookie.setHttpOnly(true); // Cookie ist nur über HTTP erreichbar
+        cookie.setSecure(false); // Erfordert HTTPS für das Cookie
+        cookie.setPath("/"); // Setze den Pfad des Cookies
+        cookie.setMaxAge(2000);
+        cookie.setAttribute("SameSite", "None");
+        cookie.setDomain("localhost");
+        return cookie;
+    }
+
+    private Cookie createLogoutCookie(){
+        Cookie cookie = new Cookie("jwtToken", "");
+        cookie.setMaxAge(0);
+        cookie.setHttpOnly(true); // Cookie ist nur über HTTP erreichbar
+        cookie.setSecure(false); // Erfordert HTTPS für das Cookie
+        cookie.setPath("/"); // Setze den Pfad des Cookie;
+        cookie.setAttribute("SameSite", "None");
+        cookie.setDomain("localhost");
+        return cookie;
     }
 }

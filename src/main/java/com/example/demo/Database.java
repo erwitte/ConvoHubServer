@@ -253,6 +253,7 @@ public class Database {
         String getUserIdQuery = "SELECT * FROM USERS WHERE USERNAME = '" + username + "'";
         ResultSet rs = getResultSet(getUserIdQuery);
         try {
+
             return rs.getInt("ID");
         } catch (Exception e){
             System.out.println(e.getMessage());
