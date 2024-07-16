@@ -66,4 +66,8 @@ public class ServerCrypto {
         return decodedJWT.getSubject();
     }
 
+    public static String returnInJsonString(String jsonKey,String singleLineAnswer){
+        return "{\""+jsonKey+"\": \"" + singleLineAnswer + "\"}";
+    }
+
 }

@@ -144,6 +144,22 @@ public class Database {
         }
     }
 
+    public String getRoomName(int roomId) {
+        String getRoomNameQuery = "SELECT ROOMNAME FROM ROOMS WHERE ID = " + roomId;
+        System.out.println(getRoomNameQuery);
+        ResultSet rs = getResultSetNElements(getRoomNameQuery);
+        try {
+            if (rs.next()) {
+                return rs.getString("ROOMNAME");
+            } else {
+                throw new SQLException("Raum mit ID " + roomId + " wurde nicht gefunden");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return null; // oder eine geeignete Rückgabe, wenn der Raum nicht gefunden wurde
+        }
+    }
+
     public boolean removeUser(String username){
         String removeUserQuery = "DELETE FROM USERS WHERE USERNAME = '" + username + "'";
         return executeQuery(removeUserQuery);
@@ -260,9 +276,8 @@ public class Database {
         }
     }
 
-    public List<Room> convertResultSetToList(ResultSet resultSet) throws SQLException {
+    public List<Room> convertResultSetRoomToList(ResultSet resultSet) throws SQLException {
         List<Room> rooms = new ArrayList<>();
-
         try {
             Room room = new Room();
             room.setRoomId(resultSet.getInt("id"));
@@ -278,6 +293,23 @@ public class Database {
             System.out.println(e.getMessage());
         }
         return rooms;
+    }
+
+    // Methode, um ResultSet für Benutzer in Liste von User-Objekten zu konvertieren
+    public List<User> convertResultSetUserToList(ResultSet resultSet) throws SQLException {
+        List<User> users = new ArrayList<>();
+        try {
+            while (resultSet.next()) {
+                User user = new User();
+                user.setId(resultSet.getInt("id"));
+                user.setUsername(resultSet.getString("username"));
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            System.out.println("Fehler beim Konvertieren des ResultSets zu User-Liste: " + e.getMessage());
+        }
+
+        return users;
     }
 
     public ResultSet getUserRoomsResultSet(int userId) {
@@ -305,6 +337,46 @@ public class Database {
 
         return roomCompleteRs;
     }
+
+    public ResultSet getUserInRoomsResultSet(int roomId) {
+        // Query, um die UserID zu erhalten, die diesem Raum zugeordnet sind
+        String getUserIdsQuery = "SELECT user_id FROM room_users WHERE room_id = " + roomId;
+        System.out.println(getUserIdsQuery);
+
+        // ResultSet für die UserIDs
+        ResultSet userIdsResultSet = getResultSetNElements(getUserIdsQuery);
+
+        // Liste für die gesammelten UserIDs
+        List<Integer> userIds = new ArrayList<>();
+
+        try {
+            while (userIdsResultSet.next()) {
+                int userId = userIdsResultSet.getInt("user_id");
+                userIds.add(userId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Erzeuge einen String für die IN-Klausel in der zweiten Abfrage
+        StringBuilder userIdsString = new StringBuilder();
+        for (int userId : userIds) {
+            userIdsString.append(userId).append(", ");
+        }
+        if (userIdsString.length() > 0) {
+            userIdsString.setLength(userIdsString.length() - 2); // Entferne das letzte ", "
+        }
+
+        // Query, um id und username für jeden Nutzer zu erhalten, der in der ersten Tabelle gefunden wurde
+        String getUsersQuery = "SELECT id, username FROM users WHERE id IN (" + userIdsString.toString() + ")";
+        System.out.println(getUsersQuery);
+
+        // ResultSet für die Benutzerdaten
+        ResultSet usersResultSet = getResultSetNElements(getUsersQuery);
+
+        return usersResultSet;
+    }
+
 
     private ResultSet getResultSet(String query){
         try{

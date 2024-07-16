@@ -100,7 +100,7 @@ public class RESTfulController {
             if(ServerCrypto.checkIfUserIsLegit(token)){
                 username = ServerCrypto.getUsernameFromToken(token);
                 ResultSet rs = database.getUserRoomsResultSet(database.getUserId(username));
-                List<Room> rooms = database.convertResultSetToList(rs);
+                List<Room> rooms = database.convertResultSetRoomToList(rs);
                 //json convert
                 ObjectMapper objectMapper = new ObjectMapper();
                 String json = objectMapper.writeValueAsString(rooms); //to json
