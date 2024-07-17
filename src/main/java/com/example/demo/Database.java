@@ -85,6 +85,20 @@ public class Database {
         }
     }
 
+    public boolean createTableForRoomMessages(int roomId){
+        String createRoomIdTable =  "CREATE TABLE ROOM_MESSAGES_" + roomId + " (" +
+                "AUTHHOR VARCHAR(255) NOT NULL, " +
+                "MESSAGE VARCHAR(255) NOT NULL);";
+        try{
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(createRoomIdTable);
+            return true;
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
     private boolean isExistsRoom(String roomName){
         String checkQuery = "SELECT * FROM ROOMS WHERE ROOMNAME = '" + roomName + "'";
         try {
@@ -116,7 +130,7 @@ public class Database {
     }
 
     public boolean addRoom(String roomName) {
-        String addQuery = "INSERT INTO ROOMS (ROOMNAME, PASSWORD) VALUES ('" + roomName + "', '')";
+        String addQuery = "INSERT INTO ROOMS (ROOMNAME) VALUES ('" + roomName + "')";
         if (isExistsRoom(roomName)) {
             return false;   // username already in database
         }

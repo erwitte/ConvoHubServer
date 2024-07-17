@@ -27,6 +27,9 @@ public class RoomController {
         if (database.addRoom(room.createChannelName())){
             System.out.println("Room " + room.createChannelName() + " created");
             database.addUserToRoom(ServerCrypto.getUsernameFromToken(token), room.createChannelName());
+            if (database.createTableForRoomMessages(database.getRoomId(room.createChannelName()))){
+                System.out.println("Table for messages in romm id");
+            }
             return ResponseEntity.status(HttpStatus.OK).body(true);
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(true);

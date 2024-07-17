@@ -2,14 +2,10 @@ package com.example.demo;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
@@ -26,10 +22,26 @@ class DatabaseTests {
     static void tearDown() {
         try (Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/convohub", "user", "password")) {
             Statement stmt = conn.createStatement();
+            tearDownMessageTable(conn);
             stmt.executeUpdate("DROP TABLE IF EXISTS ROOM_USERS");
             stmt.executeUpdate("DROP TABLE IF EXISTS USERS");
             stmt.executeUpdate("DROP TABLE IF EXISTS ROOMS");
         } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private static void tearDownMessageTable(Connection conn){
+        String getMessageTables = "SELECT ID FROM ROOMS;";
+        try{
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(getMessageTables);
+            while(rs.next()){
+                int id = rs.getInt("ID");
+                String droptMessageTable = "DROP TABLE IF EXISTS ROOM_MESSAGES_" + id;
+                stmt.executeUpdate(droptMessageTable);
+            }
+        } catch (SQLException e){
             System.out.println(e.getMessage());
         }
     }
@@ -56,7 +68,7 @@ class DatabaseTests {
 
     @Test
     void addRoomTrue() {
-        assertTrue(database.addRoom("room1"));
+        assertTrue(database.addRoom("addRoomTrue"));
     }
 
     @Test
@@ -144,4 +156,9 @@ class DatabaseTests {
         assertSame(1, database.getUserId("user1"));
         assertSame(2, database.getUserId("user2"));
     }
+
+    @Test
+    void createTableForRoomMessagesTest(){
+        assertTrue(database.createTableForRoomMessages(1));
+    }           
 }
