@@ -68,6 +68,7 @@ public class Database {
         executeQuery(createRoomsTable);
 
         addRoom("Welcome Room");
+        createTableForRoomMessages(1); // table for messages in Welcome Room
     }
 
     private void createRoom_UsersTable(){

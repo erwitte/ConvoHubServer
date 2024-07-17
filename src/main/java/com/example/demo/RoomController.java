@@ -21,14 +21,14 @@ import java.util.List;
 public class RoomController {
     private final Database database = Database.getInstance();
 
-    @PutMapping("/create")
+    @PutMapping("/")
     public ResponseEntity<Boolean> createRoom(@RequestBody CreateRoomRequest room, @CookieValue("jwtToken") String token) {
         System.out.println("room created");
         if (database.addRoom(room.createChannelName())){
             System.out.println("Room " + room.createChannelName() + " created");
             database.addUserToRoom(ServerCrypto.getUsernameFromToken(token), room.createChannelName());
             if (database.createTableForRoomMessages(database.getRoomId(room.createChannelName()))){
-                System.out.println("Table for messages in romm id");
+                System.out.println("Table for messages in room " + room.createChannelName() + " created");
             }
             return ResponseEntity.status(HttpStatus.OK).body(true);
         }
@@ -69,14 +69,14 @@ public class RoomController {
     }
 
 
-    @DeleteMapping("/deleteRoom/{id}")
+    @DeleteMapping("/{id}")
     public void deleteRoom(@PathVariable("id") int id) {
         if (database.removeRoomById(id)){
             System.out.println("Room id " + id + " deleted");
         }
     }
 
-    @DeleteMapping("/deleteUserFromRoom/{id}")
+    @DeleteMapping("/user/{id}")
     public void deleteUserFromRoom(@PathVariable("id") int id, @CookieValue("jwtToken") String token) {
         int userId = database.getUserId(getUsernameFromToken(token));
         database.removeUserFromRoomById(userId, id);    
