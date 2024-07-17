@@ -100,6 +100,16 @@ public class Database {
         }
     }
 
+    public void dropTableForRoomMessages(int roomId){
+        String dropRoomIdTable =  "DROP TABLE ROOM_MESSAGES_" + roomId;
+        try{
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(dropRoomIdTable);
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
     public boolean addMessageToMessageTable(String username, String message, int roomId){
         String addMessageQuery = "INSERT INTO ROOM_MESSAGES_" + roomId + " VALUES ('" + username + "' ,'" + message + "')";
         return executeQuery(addMessageQuery);
