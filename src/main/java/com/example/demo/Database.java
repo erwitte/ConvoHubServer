@@ -99,6 +99,11 @@ public class Database {
         }
     }
 
+    public boolean addMessageToMessageTable(String username, String message, int roomId){
+        String addMessageQuery = "INSERT INTO ROOM_MESSAGES_" + roomId + " VALUES ('" + username + "' ,'" + message + "')";
+        return executeQuery(addMessageQuery);
+    }
+
     private boolean isExistsRoom(String roomName){
         String checkQuery = "SELECT * FROM ROOMS WHERE ROOMNAME = '" + roomName + "'";
         try {
