@@ -7,6 +7,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.catalina.Server;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +48,27 @@ public class RoomController {
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("not allowed");
     }
+
+    @GetMapping("/messages/{roomId}")
+    public ResponseEntity<String> getRoomMessages(@PathVariable int roomId, @CookieValue("jwtToken") String token) throws SQLException, JsonProcessingException {
+        if(ServerCrypto.checkIfUserIsLegit(token)) {
+            String channelName = database.getRoomName(roomId);
+            if (channelName != null) {
+                //get all messages
+                ResultSet rs = database.getRoomMessagesResultSet(String.valueOf(roomId));
+                List<Message> messageList = database.convertResultSetMessageToList(rs);
+                //json convert
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = objectMapper.writeValueAsString(messageList); //to json
+                return ResponseEntity.ok(json);
+
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("not allowed");
+    }
+
 
     @GetMapping("/user/{roomId}")
     public ResponseEntity<String> getUserInRoom(@PathVariable int roomId, @CookieValue("jwtToken") String token) {

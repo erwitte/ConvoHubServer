@@ -130,6 +130,7 @@ public class Database {
         return false;
     }
 
+
     public String getPasswordByUsername(String username){
         String passwordQuery = "SELECT PASSWORD FROM USERS WHERE USERNAME = '" + username + "'";
         try {
@@ -307,6 +308,8 @@ public class Database {
         }
     }
 
+
+
     public List<Room> convertResultSetRoomToList(ResultSet resultSet) throws SQLException {
         List<Room> rooms = new ArrayList<>();
         try {
@@ -341,6 +344,30 @@ public class Database {
         }
 
         return users;
+    }
+
+    public List<Message> convertResultSetMessageToList(ResultSet resultSet) throws SQLException {
+        List<Message> messages = new ArrayList<>();
+        try {
+            while (resultSet.next()) {
+                Message message = new Message();
+                message.setAuthor(resultSet.getString("author"));
+                message.setMessage(resultSet.getString("message"));
+                message.setTimestamp(resultSet.getTimestamp("timestamp"));
+                messages.add(message);
+            }
+        } catch (SQLException e) {
+            System.out.println("Fehler beim Konvertieren des ResultSets zu User-Liste: " + e.getMessage());
+        }
+
+        return messages;
+    }
+
+    public ResultSet getRoomMessagesResultSet(String roomid){
+        String getMessagesFromRoomQuery = "SELECT * FROM room_messages_"+roomid;
+        System.out.println(getMessagesFromRoomQuery);
+        ResultSet roomIdsResultSet = getResultSetNElements(getMessagesFromRoomQuery);
+        return roomIdsResultSet;
     }
 
     public ResultSet getUserRoomsResultSet(int userId) {
