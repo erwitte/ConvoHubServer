@@ -87,9 +87,10 @@ public class Database {
     }
 
     public boolean createTableForRoomMessages(int roomId){
-        String createRoomIdTable =  "CREATE TABLE ROOM_MESSAGES_" + roomId + " (" +
-                "AUTHHOR VARCHAR(255) NOT NULL, " +
-                "MESSAGE VARCHAR(255) NOT NULL);";
+        String createRoomIdTable = "CREATE TABLE ROOM_MESSAGES_" + roomId + " (" +
+                "AUTHOR VARCHAR(255) NOT NULL, " +
+                "MESSAGE VARCHAR(255) NOT NULL, " +
+                "TIMESTAMP TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL);";
         try{
             Statement stmt = conn.createStatement();
             stmt.executeUpdate(createRoomIdTable);
