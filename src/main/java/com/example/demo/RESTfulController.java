@@ -40,8 +40,9 @@ public class RESTfulController {
         if(passwordEncoder.matches(password, hashPassword)){
             try{
                 String token = ServerCrypto.createTokenForLoginUser(username);
+                int userId = database.getUserId(username);
                 response.addCookie(ServerCrypto.createSessionCookie(token)); // Füge das Cookie zur Antwort hinzu
-                return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
+                return ResponseEntity.ok().body("{\"token\": \"" + token + "\", \"userId\": \"" + userId + "\"}");
             }catch (JWTCreationException exception){
                 //....
             }
@@ -82,7 +83,7 @@ public class RESTfulController {
         try{
             if(ServerCrypto.checkIfUserIsLegit(token)){
                 username = ServerCrypto.getUsernameFromToken(token);
-                return ResponseEntity.status(HttpStatus.OK).body("{\"username\": \"" + username + "\"}");
+                return ResponseEntity.status(HttpStatus.OK).body("{\"username\": \"" + username + "\", \"userid\": \"" + database.getUserId(username) + "\"}");
             } else {
                 throw new JWTVerificationException("User database error");
             }
@@ -90,6 +91,23 @@ public class RESTfulController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
         }
     }
+
+    @GetMapping("/api/user/id")
+    public ResponseEntity<String> getID(@CookieValue("jwtToken") String token){
+        printDebug("user/id", token);
+        String username="";
+        try{
+            if(ServerCrypto.checkIfUserIsLegit(token)){
+                username = ServerCrypto.getUsernameFromToken(token);
+                return ResponseEntity.status(HttpStatus.OK).body("{\"userID\": \"" + database.getUserId(username) + "\"}");
+            } else {
+                throw new JWTVerificationException("User database error");
+            }
+        }catch (JWTVerificationException exception){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+        }
+    }
+
 
     //die token abfrage und die zusätzliche datenbankabfrage für den nutzer muss in eine eigene funktion, damit das nicht immer aufgerufen werden muss
     @GetMapping("/api/channel")

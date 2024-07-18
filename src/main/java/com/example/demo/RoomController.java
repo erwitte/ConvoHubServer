@@ -69,7 +69,7 @@ public class RoomController {
     }
 
 
-                        @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}")
     public void deleteRoom(@PathVariable("id") int id) {
         if (database.removeRoomById(id)){
             System.out.println("Room id " + id + " deleted");
