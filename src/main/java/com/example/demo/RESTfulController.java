@@ -175,7 +175,7 @@ public class RESTfulController {
                 if (ports.containsKey(id)) {
                     String username = ServerCrypto.getUsernameFromToken(token);
                     addUserToRoom(id, username);
-                    String returnValue = ports.get(id) + readOutChannelDatabase(id);
+                    String returnValue = "#%" + ports.get(id) + "%#" + readOutChannelDatabase(id);
                     return ResponseEntity.status(HttpStatus.OK).body(returnValue);
                 }
                 try {
@@ -183,7 +183,7 @@ public class RESTfulController {
                     int port = server.startServer();
                     currentPort = port + 1;
                     ports.put(id, port);
-                    String returnValue = ports.get(id) + readOutChannelDatabase(id);
+                    String returnValue = "#%" + ports.get(id) + "%#" + readOutChannelDatabase(id);
                     return ResponseEntity.status(HttpStatus.OK).body(returnValue);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
