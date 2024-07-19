@@ -111,8 +111,10 @@ public class Database {
         }
     }
 
-    public boolean addMessageToMessageTable(String username, String message, int roomId){
-        String addMessageQuery = "INSERT INTO ROOM_MESSAGES_" + roomId + " VALUES ('" + username + "' ,'" + message + "')";
+    public boolean addMessageToMessageTable(Message message, int roomId){
+        System.out.println(message.getTimestamp());
+        String addMessageQuery = "INSERT INTO ROOM_MESSAGES_" + roomId + " (author, message, timestamp) VALUES ('" + message.getAuthor() + "', '" + message.getMessage() + "', '" + message.getTimestamp() +"')";
+        System.out.println(addMessageQuery);
         return executeQuery(addMessageQuery);
     }
 
@@ -363,10 +365,33 @@ public class Database {
         return messages;
     }
 
-    public ResultSet getRoomMessagesResultSet(String roomid){
-        String getMessagesFromRoomQuery = "SELECT * FROM room_messages_"+roomid;
+    public List<Room> convertResultSetRooms(ResultSet resultSet) throws SQLException{
+        List<Room> rooms = new ArrayList<>();
+        try {
+            while (resultSet.next()) {
+                Room room = new Room();
+                room.setRoomId(resultSet.getInt("id"));
+                room.setRoomName(resultSet.getString("roomname"));
+                rooms.add(room);
+            }
+        } catch (SQLException e) {
+            System.out.println("Fehler beim Konvertieren des ResultSets zu User-Liste: " + e.getMessage());
+        }
+
+        return rooms;
+    }
+
+    public ResultSet getRoomMessagesResultSet(String roomid) {
+        String getMessagesFromRoomQuery = "SELECT * FROM room_messages_" + roomid;
         System.out.println(getMessagesFromRoomQuery);
         ResultSet roomIdsResultSet = getResultSetNElements(getMessagesFromRoomQuery);
+        return roomIdsResultSet;
+    }
+
+    public ResultSet getRoomsResultSet(){
+        String getRoomsQuery = "SELECT * FROM rooms";
+        System.out.println(getRoomsQuery);
+        ResultSet roomIdsResultSet = getResultSetNElements(getRoomsQuery);
         return roomIdsResultSet;
     }
 
