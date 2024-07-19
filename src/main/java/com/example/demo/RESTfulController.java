@@ -4,6 +4,8 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.grpc.Server;
+import io.grpc.ServerBuilder;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -25,8 +28,14 @@ public class RESTfulController {
     private final String cryptoSecret = "CWhdZS1t4N3Vul6ihk5/5mU5e0Z2St+8o4/pAWFZfA=";
     @Autowired
     private PasswordEncoder passwordEncoder;
+    Server server;
 
-     @PostMapping("/api/login")
+
+    public RESTfulController() throws IOException {
+        //server.awaitTermination();
+    }
+
+    @PostMapping("/api/login")
     public ResponseEntity<String> loginRequest(@RequestBody LoginRequest loginRequest, HttpServletResponse response){
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
@@ -160,5 +169,8 @@ public class RESTfulController {
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
     }
 
+    /*@PostMapping("/api/channel/{id}")
+    public ResponseEntity<Boolean> enterChannel(@PathVariable String id){
 
+    }*/
 }
