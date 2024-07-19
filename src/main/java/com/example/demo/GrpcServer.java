@@ -9,11 +9,10 @@ import java.io.IOException;
 public class GrpcServer implements CommandLineRunner {
     private Server grpcServer;
     private int port;
-    private static int offset = 0;
     private boolean isPortFound = false;
 
     public GrpcServer(int port) {
-        this.port = port + offset;
+        this.port = port;
     }
 
     public int startServer() throws Exception {
@@ -29,7 +28,7 @@ public class GrpcServer implements CommandLineRunner {
         while(!isPortFound) {
             port = findFreePort(port);
         }
-        System.out.println("gRPC server started on port " + (port + offset));
+        System.out.println("gRPC server started on port " + port);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutting down gRPC server");

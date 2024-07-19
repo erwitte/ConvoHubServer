@@ -169,19 +169,55 @@ public class RESTfulController {
     }
 
     @PostMapping("/api/channel/{id}")
-    public ResponseEntity<Integer> enterChannel(@PathVariable int id){
-        if (ports.containsKey(id)){
-            return ResponseEntity.status(HttpStatus.OK).body(ports.get(id));
-        }       
+    public ResponseEntity<String> enterChannel(@PathVariable int id, @CookieValue("jwtToken") String token){
         try {
-            GrpcServer server = new GrpcServer(currentPort);
-            int port = server.startServer();
-            currentPort = port + 1;
-            ports.put(id, port);
-            return ResponseEntity.status(HttpStatus.OK).body(port);
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(-1);
+            if (ServerCrypto.checkIfUserIsLegit(token)) {
+                if (ports.containsKey(id)) {
+                    String username = ServerCrypto.getUsernameFromToken(token);
+                    addUserToRoom(id, username);
+                    String returnValue = ports.get(id) + readOutChannelDatabase(id);
+                    return ResponseEntity.status(HttpStatus.OK).body(returnValue);
+                }
+                try {
+                    GrpcServer server = new GrpcServer(currentPort);
+                    int port = server.startServer();
+                    currentPort = port + 1;
+                    ports.put(id, port);
+                    String returnValue = ports.get(id) + readOutChannelDatabase(id);
+                    return ResponseEntity.status(HttpStatus.OK).body(returnValue);
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error");
+                }
+            } else {
+                throw new JWTVerificationException("User database error");
+            }
+        } catch (JWTVerificationException exception){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+        } catch (SQLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal Server Error")        ;
         }
+    }
+
+    private void addUserToRoom(int roomId, String username) throws SQLException {
+        int userId = database.getUserId(username);
+        ResultSet rs = database.getUserInRoomsResultSet(roomId);
+        boolean isInRoom = false;
+        while(rs.next()){
+            isInRoom = userId == rs.getInt("USER_ID");
+        }
+        if(!isInRoom){
+            database.addUserToRoom(username, database.getRoomName(roomId));
+        }
+    }
+
+    private String readOutChannelDatabase(int roomId) throws SQLException {
+        ResultSet rs = database.getRoomMessages(roomId);
+        StringBuilder bob = new StringBuilder();
+        while(rs.next()){
+            bob.append("#@").append(rs.getString("AUTHOR")).append("@#");
+            bob.append("#\\").append(rs.getString("MESSAGE")).append("\\#");
+        }
+        return bob.toString();
     }
 }

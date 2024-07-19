@@ -310,6 +310,16 @@ public class Database {
         }
     }
 
+    public ResultSet getRoomMessages(int roomId){
+        String query = "SELECT * FROM ROOM_MESSAGES_" + roomId;
+        try {
+            Statement stmt = conn.createStatement();
+            return stmt.executeQuery(query);
+        } catch (SQLException e){
+            return null;
+        }
+    }
+
 
 
     public List<Room> convertResultSetRoomToList(ResultSet resultSet) throws SQLException {
