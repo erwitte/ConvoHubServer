@@ -5,7 +5,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.Server;
-import io.grpc.ServerBuilder;
+import io.grpc.stub.StreamObserver;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.example.demo.ServerCrypto.printDebug;
 
@@ -28,12 +30,9 @@ public class RESTfulController {
     private final String cryptoSecret = "CWhdZS1t4N3Vul6ihk5/5mU5e0Z2St+8o4/pAWFZfA=";
     @Autowired
     private PasswordEncoder passwordEncoder;
-    Server server;
+    private static Map<Integer, Integer> ports = new HashMap<>();
+    private static int currentPort = 8080;
 
-
-    public RESTfulController() throws IOException {
-        //server.awaitTermination();
-    }
 
     @PostMapping("/api/login")
     public ResponseEntity<String> loginRequest(@RequestBody LoginRequest loginRequest, HttpServletResponse response){
@@ -169,8 +168,20 @@ public class RESTfulController {
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
     }
 
-    /*@PostMapping("/api/channel/{id}")
-    public ResponseEntity<Boolean> enterChannel(@PathVariable String id){
-
-    }*/
+    @PostMapping("/api/channel/{id}")
+    public ResponseEntity<Integer> enterChannel(@PathVariable int id){
+        if (ports.containsKey(id)){
+            return ResponseEntity.status(HttpStatus.OK).body(ports.get(id));
+        }       
+        try {
+            GrpcServer server = new GrpcServer(currentPort);
+            int port = server.startServer();
+            currentPort = port + 1;
+            ports.put(id, port);
+            return ResponseEntity.status(HttpStatus.OK).body(port);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(-1);
+        }
+    }
 }

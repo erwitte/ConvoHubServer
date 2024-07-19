@@ -160,7 +160,7 @@ class DatabaseTests {
     @Test
     void createTableForRoomMessagesTest(){
         assertTrue(database.createTableForRoomMessages(1));
-        assertTrue(database.addMessageToMessageTable("est", "test", 1));
+        assertTrue(database.addMessageToMessageTable("est", 1));
         database.dropTableForRoomMessages(1);
         // to pass comment out creation of "welcome room" in createRoomsTable
     }

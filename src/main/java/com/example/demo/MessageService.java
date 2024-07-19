@@ -12,6 +12,7 @@ public class MessageService extends MessageGrpc.MessageImplBase {
     @Override
     public StreamObserver<ChatMessage> chat(StreamObserver<ChatMessage> responseObserver) {
         observers.add(responseObserver);
+        System.out.println("count: " + observers.size())        ;
 
         return new StreamObserver<ChatMessage>() {
             @Override
