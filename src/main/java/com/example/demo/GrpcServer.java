@@ -26,6 +26,7 @@ public class GrpcServer implements CommandLineRunner {
 
     private void startGrpcServer() throws IOException {
         while(!isPortFound) {
+            // tries to set up a server on the current port until it works
             port = findFreePort(port);
         }
         System.out.println("gRPC server started on port " + port);

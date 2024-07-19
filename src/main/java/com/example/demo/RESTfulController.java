@@ -137,9 +137,7 @@ public class RESTfulController {
             }
         }catch (JWTVerificationException exception){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (JsonProcessingException e) {
+        } catch (SQLException | JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
@@ -174,7 +172,9 @@ public class RESTfulController {
             if (ServerCrypto.checkIfUserIsLegit(token)) {
                 if (ports.containsKey(id)) {
                     String username = ServerCrypto.getUsernameFromToken(token);
+                    database.addUserToRoom(username, database.getRoomName(id));
                     addUserToRoom(id, username);
+                    // creates string with the server's port and concats it with all past messages
                     String returnValue = "#%" + ports.get(id) + "%#" + readOutChannelDatabase(id);
                     return ResponseEntity.status(HttpStatus.OK).body(returnValue);
                 }
